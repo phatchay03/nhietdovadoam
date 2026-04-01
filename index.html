@@ -1,20 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoT Dashboard - Nhiệt độ & Độ ẩm</title>
-    <!-- Tailwind CSS để tạo kiểu -->
+    <title>IoT Dashboard - Nhiệt độ & Độ ẩm Realtime</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons để hiển thị icon -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
+        body { font-family: 'Inter', sans-serif; }
         .text-huge {
             font-size: clamp(5rem, 15vw, 10rem);
             line-height: 1;
@@ -36,7 +32,7 @@
 
             <div class="flex items-baseline">
                 <span id="temp-value" class="text-huge font-black tracking-tighter text-slate-900 tabular-nums">
-                    26.8
+                    --
                 </span>
                 <span class="text-5xl font-bold text-slate-300 ml-4">°C</span>
             </div>
@@ -53,7 +49,7 @@
 
             <div class="flex items-baseline">
                 <span id="humidity-value" class="text-huge font-black tracking-tighter text-slate-900 tabular-nums">
-                    55
+                    --
                 </span>
                 <span class="text-5xl font-bold text-slate-300 ml-4">%</span>
             </div>
@@ -61,11 +57,45 @@
 
     </div>
 
+    <!-- Tải thư viện Era Widget -->
+    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
-        // Khởi tạo icon
+        // Khởi tạo icon Lucide
         lucide.createIcons();
 
-        // Đã loại bỏ hàm updateSensorData và setInterval để con số không tự nhảy
+        // Các phần tử hiển thị
+        const tempElement = document.getElementById('temp-value');
+        const humiElement = document.getElementById('humidity-value');
+
+        // Biến lưu cấu hình
+        let configTemp = null;
+        let configHumi = null;
+
+        const eraWidget = new EraWidget();
+        eraWidget.init({
+            needRealtimeConfigs: true,
+            maxRealtimeConfigsCount: 2, // Chỉ cần 2 chân cho Nhiệt độ và Độ ẩm
+            
+            onConfiguration: (configuration) => {
+                // Giả định: 
+                // Index 0 trên Dashboard Era là Nhiệt độ
+                // Index 1 trên Dashboard Era là Độ ẩm
+                configTemp = configuration.realtime_configs[0];
+                configHumi = configuration.realtime_configs[1];
+            },
+
+            onValues: (values) => {
+                // Cập nhật Nhiệt độ nếu có cấu hình
+                if (configTemp && values[configTemp.id]) {
+                    tempElement.innerText = values[configTemp.id].value;
+                }
+
+                // Cập nhật Độ ẩm nếu có cấu hình
+                if (configHumi && values[configHumi.id]) {
+                    humiElement.innerText = values[configHumi.id].value;
+                }
+            }
+        });
     </script>
 </body>
 </html>
